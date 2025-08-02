@@ -1,0 +1,60 @@
+This line:
+
+```python
+while chunk := await file.read(1024):
+```
+
+is using the **walrus operator** `:=`, which was introduced in **Python 3.8**. Let’s break it down:
+
+---
+
+### ✅ What it means:
+
+This is a **compact way** of writing a `while` loop that:
+
+1. Reads a chunk of 1024 bytes from a file asynchronously.
+2. Assigns it to the variable `chunk`.
+3. Continues the loop **only if** the chunk is **not empty**.
+
+---
+
+### 🔁 Expanded version (for clarity):
+
+```python
+while True:
+    chunk = await file.read(1024)
+    if not chunk:
+        break
+    # process the chunk here
+```
+
+So basically:
+
+* `await file.read(1024)` reads 1024 bytes (or less, if at the end of the file).
+* If the result is empty (i.e., `b''`), the loop stops.
+* Otherwise, it processes the chunk.
+
+---
+
+### 🧠 Used in context like:
+
+When you're **streaming** a file — say, uploading to a server — and want to **avoid loading the entire file into memory**, you read it piece by piece (`chunk`) and process each piece (e.g., save it, scan it, etc.).
+
+---
+
+### 🧪 Example use in FastAPI file upload:
+
+```python
+@app.post("/upload")
+async def upload(file: UploadFile = File(...)):
+    with open("output.txt", "wb") as f:
+        while chunk := await file.read(1024):
+            f.write(chunk)
+    return {"message": "File uploaded successfully!"}
+```
+
+This saves the uploaded file in 1024-byte chunks, which is **memory-efficient**.
+
+---
+
+Let me know if you want a live frontend-backend working demo of this too!
