@@ -1083,3 +1083,103 @@ async def upload(
 ---
 
 Would you like me to break down a **real raw HTTP multipart request** so you can see what it looks like under the hood?
+
+
+Great — let's break it down **clearly** and **visually**.
+
+---
+
+## ❓ Why are these arguments here?
+
+```python
+async def analyze_resumes(
+    job_description: str = Form(...),
+    hiring_type: str = Form(...),
+    level: str = Form(...),
+    files: List[UploadFile] = File(...)
+)
+```
+
+Because you're accepting **form data + files** from the frontend HTML form:
+
+```html
+<form action="/analyze-resumes/" enctype="multipart/form-data" method="post">
+```
+
+This line tells FastAPI:
+
+> “Expect `multipart/form-data` — this will include text inputs **and** file uploads.”
+
+So, you **must** use `Form(...)` for text inputs and `File(...)` for files.
+
+---
+
+## 🔍 Detailed Explanation of Each Argument
+
+| Parameter                             | Type      | Why `Form(...)` or `File(...)`?     | Comes from                                  |
+| ------------------------------------- | --------- | ----------------------------------- | ------------------------------------------- |
+| `job_description: str = Form(...)`    | Text      | Sent as a text field in the form    | `<textarea name="job_description">...`      |
+| `hiring_type: str = Form(...)`        | Text      | Sent as selected option             | `<select name="hiring_type">...`            |
+| `level: str = Form(...)`              | Text      | Also selected from dropdown         | `<select name="level">...`                  |
+| `files: List[UploadFile] = File(...)` | File List | Because `input type="file"` is used | `<input name="files" type="file" multiple>` |
+
+---
+
+## 🔧 Why `Form(...)` instead of just `str`?
+
+Because form inputs are not JSON — they're **form-encoded**. FastAPI **won’t extract text fields from a multipart form** unless you explicitly mark them with `Form(...)`.
+
+Likewise, uploaded files must be marked with `File(...)` or FastAPI won’t recognize them.
+
+---
+
+## 🧠 Analogy
+
+Imagine this:
+
+> You are receiving a **parcel** (form data). FastAPI asks you:
+>
+> * "Is this a text field or a file?"
+> * You must mark each item with `Form(...)` or `File(...)` to help FastAPI unpack it correctly.
+
+---
+
+## ✅ Visual Mapping
+
+HTML Form:
+
+```html
+<form enctype="multipart/form-data">
+    <textarea name="job_description">...</textarea>   ⟶  Form(...)
+    <select name="hiring_type">...</select>           ⟶  Form(...)
+    <select name="level">...</select>                 ⟶  Form(...)
+    <input type="file" name="files" multiple>         ⟶  File(...)
+</form>
+```
+
+FastAPI:
+
+```python
+async def analyze_resumes(
+    job_description: str = Form(...),
+    hiring_type: str = Form(...),
+    level: str = Form(...),
+    files: List[UploadFile] = File(...)
+)
+```
+
+---
+
+## 📦 Bonus Tip
+
+If your frontend was sending **JSON** instead of form data, you would use:
+
+```python
+async def analyze_resumes(payload: YourPydanticModel)
+```
+
+But for HTML forms (`multipart/form-data`), you use `Form` and `File`.
+
+---
+
+Let me know if you want a simplified version or want to convert this to use React or Postman for testing!
