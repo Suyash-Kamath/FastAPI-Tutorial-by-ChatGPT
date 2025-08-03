@@ -77,3 +77,80 @@ item = Item(**parsed_data)
 * ✅ You don’t need to write boilerplate to extract and validate request data.
 
 Would you like to try it with an actual test request example using `curl` or a frontend like Postman?
+
+
+Great question. Let’s break that part down step by step — **how the `item` object is passed into `create_item()` function** — in the simplest terms possible.
+
+---
+
+## 📦 Your route:
+
+```python
+@app.post("/items")
+def create_item(item: Item):
+    return {"item_name": item.name, "item_price": item.price}
+```
+
+This is a **FastAPI route handler**.
+It expects one input: `item`, and says it must be of type `Item`.
+
+---
+
+## 💡 What happens when a client sends this request:
+
+```http
+POST /items
+Content-Type: application/json
+
+{
+  "name": "Pen",
+  "price": 9.99
+}
+```
+
+---
+
+### 🔄 FastAPI does the following under the hood:
+
+1. **Reads** the request body (JSON) → `{"name": "Pen", "price": 9.99}`
+2. **Parses** it into a Python dictionary:
+
+   ```python
+   data = {"name": "Pen", "price": 9.99}
+   ```
+3. **Instantiates** the `Item` class using that data:
+
+   ```python
+   item = Item(**data)  # same as Item(name="Pen", price=9.99)
+   ```
+4. **Passes** that `item` object into your function:
+
+   ```python
+   create_item(item)
+   ```
+
+---
+
+So in plain English:
+
+* You send data → FastAPI creates an `Item` object → That object is given as the `item` argument inside your function.
+
+---
+
+### 🎯 Visual Summary
+
+```
+[Client sends JSON]
+        ↓
+{name: "Pen", price: 9.99}
+        ↓
+FastAPI → parses it → creates Item(name="Pen", price=9.99)
+        ↓
+Calls your function: create_item(item)
+                           ↑
+                    item = Item(...)
+```
+
+---
+
+Would you like a **live working example** (like using `curl`, Postman, or frontend HTML form) to see it in action?
