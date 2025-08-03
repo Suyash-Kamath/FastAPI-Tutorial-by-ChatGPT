@@ -1,0 +1,79 @@
+In your FastAPI code, **instantiation of the `Item` class** happens **automatically** when you send a **POST request to `/items` with a JSON body**.
+
+---
+
+### 🔁 Step-by-step: How `Item` gets instantiated
+
+#### ✅ 1. You defined a Pydantic model:
+
+```python
+class Item(BaseModel):
+    name: str
+    price: float
+```
+
+This defines a data structure with type validation. `Item` is **not instantiated here**; you're just defining a blueprint.
+
+---
+
+#### ✅ 2. You defined a route:
+
+```python
+@app.post("/items")
+def create_item(item: Item):
+    ...
+```
+
+FastAPI sees that the route handler expects a parameter `item` of type `Item`.
+
+---
+
+#### ✅ 3. When a POST request is sent:
+
+Client sends a request like this:
+
+```json
+POST /items
+Content-Type: application/json
+
+{
+  "name": "Pen",
+  "price": 9.99
+}
+```
+
+---
+
+#### ✅ 4. FastAPI does this under the hood:
+
+* It **reads the JSON body** of the request.
+* It parses that JSON into a Python dictionary:
+  `{"name": "Pen", "price": 9.99}`
+* It then **automatically instantiates the `Item` class** like this:
+
+  ```python
+  item = Item(name="Pen", price=9.99)
+  ```
+* This is passed into the function `create_item()` as the argument `item`.
+
+---
+
+### 📌 In short:
+
+**You never manually instantiate `Item` — FastAPI and Pydantic do it for you.**
+It's like behind the scenes, it does:
+
+```python
+# FastAPI internal equivalent
+parsed_data = json.loads(request.body)
+item = Item(**parsed_data)
+```
+
+---
+
+### 🧠 Bonus: Why this is powerful
+
+* ✅ **Validation** is automatically handled by Pydantic (e.g., wrong data type → 422 error).
+* ✅ You don’t need to write boilerplate to extract and validate request data.
+
+Would you like to try it with an actual test request example using `curl` or a frontend like Postman?
