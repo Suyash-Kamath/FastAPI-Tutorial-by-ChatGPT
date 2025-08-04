@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Form, File, UploadFile
 from fastapi.responses import HTMLResponse
 from typing import List
-
+import uvicorn
 app = FastAPI()
 
 # Serve HTML form
@@ -70,3 +70,6 @@ async def analyze_resumes(
         })
 
     return result
+
+if __name__=="__main__":
+    uvicorn.run("main:app",host="127.0.0.1",reload=True,port=8000)

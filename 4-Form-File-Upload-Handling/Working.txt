@@ -1,0 +1,85 @@
+Great question!
+
+Let’s break it down so you **understand clearly how the `analyze_resumes` function gets called when you submit the form**:
+
+---
+
+### 🔁 Flow of Execution:
+
+1. 🧑‍💻 **User opens**:
+   Browser visits `http://127.0.0.1:8000/`
+
+2. 🖼️ **GET request to `/`**:
+   The `form_ui()` function returns the HTML form with:
+
+   ```html
+   <form action="/analyze-resumes/" enctype="multipart/form-data" method="post">
+   ```
+
+3. ✅ **User fills out the form** and clicks **Submit**.
+
+4. 🚀 The browser sends a **POST request** to `/analyze-resumes/` with:
+
+   * Form fields:
+
+     * `job_description`
+     * `hiring_type`
+     * `level`
+   * Uploaded files under field name `files`
+
+5. 📥 FastAPI matches the POST route:
+
+   ```python
+   @app.post("/analyze-resumes/")
+   async def analyze_resumes(...):
+   ```
+
+   So this function is **automatically triggered**.
+
+6. 📊 Inside `analyze_resumes`, FastAPI:
+
+   * Reads `Form(...)` fields
+   * Reads and streams uploaded files with `File(...)`
+   * Prepares the `result` and returns it as JSON
+
+---
+
+### 🧠 Why It Works
+
+Because of this line in the form:
+
+```html
+<form action="/analyze-resumes/" enctype="multipart/form-data" method="post">
+```
+
+It tells the browser:
+
+* **Where** to send the data → `/analyze-resumes/`
+* **How** to send it → `POST` request with form + file data (thanks to `enctype="multipart/form-data"`)
+
+FastAPI handles that POST request using:
+
+```python
+@app.post("/analyze-resumes/")
+```
+
+---
+
+### 🧪 Test It Yourself
+
+1. Run the app:
+
+   ```
+   python main.py
+   ```
+2. Open in browser:
+
+   ```
+   http://127.0.0.1:8000/
+   ```
+3. Fill in the form, upload a file, and click **Submit**.
+4. You’ll see a **JSON response** with details about your input and uploaded files.
+
+---
+
+Would you like the result to be displayed in HTML format instead of raw JSON? I can show that too if needed.
